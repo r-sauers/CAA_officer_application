@@ -10,8 +10,8 @@
 	require('./oauth/oauth_client.php');
 
 	// grabs variables
-	require("./oauth/oauth_id.php");
-	require("./oauth/oauth_secret.php");
+	require("./oauth_id.php");
+	require("./oauth_secret.php");
 	
 	// configure oauth
 	$client = new oauth_client_class;
@@ -62,31 +62,11 @@
 </head>
 <body>
 <?php
-		
-
-		// get Access token and HREF
-		$ACCESS_TOKEN = $client->access_token;
-		$HREF = "";
-		foreach ($user->accounts as $account) {
-			if ($account->name == "Compassionate Action for Animals") {
-				$HREF = $account->href;
-			}
-		}
-
-		# There was an error getting href!!
-		if ($HREF == "") {
-			echo '<h1 style="color:red;">', HtmlSpecialChars($user->identity->first_name),
-			' you were logged into 37Signals, but we couldn\'t find CAA! :(</h1>';
-			exit;
-		}
-
-		# Welcome User
-		echo '<h1>', HtmlSpecialChars($user->identity->first_name),
-			' you have successfully logged into CAA\'s basecamp with 37Signals!</h1>';
-
-
-		# creates curl request for projects
-		$ch = curl_init($HREF."/projects.json");
+	
+	# This function makes a curl request for reading api data
+	function api_curl_get ($uri) {
+		global $ACCESS_TOKEN;
+		$ch = curl_init($uri);
 		$headers = array(
 			"Authorization: Bearer ".$ACCESS_TOKEN
 		);
@@ -95,8 +75,49 @@
 		curl_setopt($ch, CURLOPT_USERAGENT, "CAA Officer App (sauer319@umn.edu)");
 		$response = json_decode(htmlspecialchars_decode(curl_exec($ch)));
 		curl_close($ch);
+		return $response;
+	}
 
-		echo "<pre>".print_r($response, 1)."</pre>";
+	function api_curl_post_json ($uri) {
+		global $ACCESS_TOKEN;
+		$ch = curl_init($uri);
+		$headers = array(
+			"Authorization: Bearer ".$ACCESS_TOKEN,
+			"Content-Type: json"
+		);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($ch, CURLOPT_USERAGENT, "CAA Officer App (sauer319@umn.edu)");
+		$response = json_decode(htmlspecialchars_decode(curl_exec($ch)));
+		curl_close($ch);
+		return $response;
+	}
+
+	function api_curl_post_attachment ($uri) {
+		global $ACCESS_TOKEN;
+		$ch = curl_init($uri);
+		$headers = array(
+			"Authorization: Bearer ".$ACCESS_TOKEN
+		);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($ch, CURLOPT_USERAGENT, "CAA Officer App (sauer319@umn.edu)");
+		$response = json_decode(htmlspecialchars_decode(curl_exec($ch)));
+		curl_close($ch);
+		return $response;
+	}
+
+	function pretty_print($data){
+		echo "<pre>".print_r($data, 1)."</pre>";
+	}
+
+	// get Access
+	$ACCESS_TOKEN = $client->access_token;
+
+	# Welcome User
+	echo '<h1>', HtmlSpecialChars($user->identity->first_name),
+		' you have successfully logged into CAA\'s basecamp with 37Signals!</h1>';
+
 
 ?>
 </body>
