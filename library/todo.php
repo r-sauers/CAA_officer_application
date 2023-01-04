@@ -40,7 +40,11 @@ class Todo {
     static function load_from_api($api_url) {
 
         $response = api_curl_get($api_url);
-        return self->load_from_api_response($response);
+        if ($response["headers"]["status"] == "200"){
+            return self->load_from_api_response($response["body"]);
+        } else {
+            die("Could not get $api_url when loading todo from api in Todo::load_from_api, status: ".$response["headers"]["status"]);
+        }
         
     }
 
