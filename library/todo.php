@@ -35,31 +35,19 @@ class Todo {
         $this->description_file = $description_file;
     }
 
-    static function loadFromApi($api_url) {
+    
+
+    static function load_from_api($api_url) {
+
         $response = api_curl_get($api_url);
+        return self->load_from_api_response($response);
+        
+    }
+
+    static function load_from_api_response($response) {
 
         # create a file to store description in (make sure not to overwrite any files)
-        $dir = "descriptions/";
-        $filename = $response->content.".rtf";
-        $version = 0;
-        $filename_used = true;
-        while ($filename_used) {
-            $filename_used = false;
-            if ($dh = opendir($dir)){
-                while (($file = readdir($dh)) !== false){
-                    if ($file == $filename){
-                        $filename_used = true;
-                        $version += 1;
-                        $filename = $response->content . " (" . $version . ").rtf";
-                        break;
-                    }
-                }
-            }
-        }
-        $description_file = $dir . $filename;
-        $new_file = fopen($description_file, "w") or die("Unable to create file!");
-        fwrite($new_file, $response->description);
-        fclose($new_file);
+        $description_file = generate_description_file($response->content, $response->description);
         
         # create it
         $instance = new self(
@@ -67,27 +55,23 @@ class Todo {
             $response->due_on, $response->starts_on, 
             $response->notify, $response->completion_subscriber_ids);
 
-        $instance->setApiUrl($api_url);
+        $instance->set_api_url($response->url);
 
         return $instance;
-    }
 
-    static function loadFromDatabase() {
-        die("NOT IMPLEMENTED");
-        exit;
     }
 
     /*
     Sets the api_url, a link to the corresponding task in the basecamp api
     */
-    function setApiUrl($api_url) {
+    function set_api_url($api_url) {
         $this->api_url = $api_url;
     }
 
     /*
     Returns a json body for bascamp api requests to make a todo
     */
-    function makeBasecampJson(){
+    function generate_basecamp_json(){
         return json_encode([
             "content" => $this->content,
             "description" => read_file($this->description_file),
