@@ -47,11 +47,16 @@ class TodoList
         $instance->api_url = $api_url;
         $instance->todos_url = $response["body"]->todos_url;
 
-        # TODO: add existing todos
-        /*$response = api_curl_get($response->todos_url);
-        foreach ($response as $todo_json){
-            $todo = Todo.load_from_api
-        }*/
+        # add existing todos
+        $response = api_curl_get($instance->todos_url);
+        if ($response["headers"]["status"] != 200){
+            die("Error: Unsuccessful curl get request to $instance->todos_url in TodoList::load_from_api, status: " 
+            . $response["headers"]["status"]);
+        }
+        foreach ($response["body"] as $todo_json){
+            $todo = Todo . load_from_api_response($todo_json);
+            array_push($instance->todos, $todo);
+        }
 
         return $instance;
     }
