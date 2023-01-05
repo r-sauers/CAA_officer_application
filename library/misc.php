@@ -5,8 +5,10 @@ function pretty_print($data)
 }
 
 function generate_description_file($name, $description){
-    $dir = "descriptions/";
+
+    $dir = "./descriptions/";
     $filename = $name.".rtf";
+    $filename = str_replace("/", "-", $filename);
     $version = 0;
     $filename_used = true;
     while ($filename_used) {
@@ -23,10 +25,18 @@ function generate_description_file($name, $description){
         }
     }
     $description_file = $dir . $filename;
-    $new_file = fopen($description_file, "w") or die("Unable to create file!");
+    $new_file = fopen($description_file, "w");
+    if ($new_file === false) {
+        die("Unable to create file with '$description_file'!");
+    }
     fwrite($new_file, $description);
     fclose($new_file);
 
-    return description_file;
+    return $description_file;
+}
+
+function app_url_to_api_url($app_url){
+    $api_url =  str_replace("basecamp", "basecampapi", $app_url).".json";
+    return $api_url;
 }
 ?>
