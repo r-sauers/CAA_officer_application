@@ -54,7 +54,7 @@ class TodoList
             . $response["headers"]["status"]);
         }
         foreach ($response["body"] as $todo_json){
-            $todo = Todo . load_from_api_response($todo_json);
+            $todo = Todo::load_from_api_response($todo_json);
             array_push($instance->todos, $todo);
         }
 

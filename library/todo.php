@@ -25,7 +25,10 @@ class Todo {
     private $starts_on;
     private $api_url;
 
-    function __construct($name, $description_file, $due_on, $assignee_ids=[], $starts_on=date("Y-m-d"), $notify=true, $completion_subscriber_ids=[]){
+    function __construct($name, $description_file, $due_on, $assignee_ids=[], $starts_on=null, $notify=true, $completion_subscriber_ids=[]){
+        if ($starts_on == null){
+            $starts_on = date("Y-m-d");
+        }
         $this->content = $name;
         $this->due_on = $due_on;
         $this->assignee_ids = $assignee_ids;
@@ -35,13 +38,11 @@ class Todo {
         $this->description_file = $description_file;
     }
 
-    
-
     static function load_from_api($api_url) {
 
         $response = api_curl_get($api_url);
         if ($response["headers"]["status"] == "200"){
-            return self->load_from_api_response($response["body"]);
+            return self::load_from_api_response($response["body"]);
         } else {
             die("Could not get $api_url when loading todo from api in Todo::load_from_api, status: ".$response["headers"]["status"]);
         }
@@ -52,12 +53,21 @@ class Todo {
 
         # create a file to store description in (make sure not to overwrite any files)
         $description_file = generate_description_file($response->content, $response->description);
-        
+
+        $assignee_ids = [];
+        foreach ($response->assignees as $assignee) {
+            array_push($assignee_ids, $assignee->id);
+        }
+        $completion_subscriber_ids = [];
+        foreach ($response->completion_subscribers as $completion_subscriber) {
+            array_push($completion_subscriber_ids, $completion_subscriber->id);
+        }
+
         # create it
         $instance = new self(
-            $response->content, $description_file, 
-            $response->due_on, $response->starts_on, 
-            $response->notify, $response->completion_subscriber_ids);
+            $response->content, $description_file,
+            $response->due_on, $assignee_ids, $response->starts_on, 
+            null, $completion_subscriber_ids);
 
         $instance->set_api_url($response->url);
 
