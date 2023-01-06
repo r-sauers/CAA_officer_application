@@ -61,7 +61,7 @@ function api_curl_post_json ($uri, $data) {
     $ch = curl_init($uri);
     $headers = array(
         "Authorization: Bearer ".$ACCESS_TOKEN,
-        "Content-Type: json"
+        "Content-Type: application/json"
     );
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); # return string, don't print it
     curl_setopt($ch, CURLOPT_HEADER, true); # include headers in output
