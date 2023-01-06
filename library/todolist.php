@@ -26,6 +26,8 @@ class TodoList
         } else {
             die("Error: Unsuccessful curl post request to $todoset_endpoint in TodoList::create_list, status: ".$response["headers"]["status"]);
         }
+
+        return $instance;
     }
     
 
@@ -47,37 +49,61 @@ class TodoList
         $instance->api_url = $api_url;
         $instance->todos_url = $response["body"]->todos_url;
 
-        # add existing todos
-        $response = api_curl_get($instance->todos_url);
-        if ($response["headers"]["status"] != 200){
-            die("Error: Unsuccessful curl get request to $instance->todos_url in TodoList::load_from_api, status: " 
-            . $response["headers"]["status"]);
+        # add existing todos with pagination
+        $link = $instance->todos_url;
+        while (true) {
+
+            // add todos from response
+            $response = api_curl_get($link);
+            
+            if ($response["headers"]["status"] != 200){
+                die("Error: Unsuccessful curl get request to $link TodoList::load_from_api, status: " 
+                . $response["headers"]["status"]);
+            }
+            foreach ($response["body"] as $todo_json){
+                $todo = Todo::load_from_api_response($todo_json);
+                array_push($instance->todos, $todo);
+            }
+
+            // get next page link
+            $raw_link = htmlspecialchars_decode($response["headers"]["link"]);
+            $matches = [];
+            if (!preg_match("/(?<=<).([^>]*)/", $raw_link, $matches)) {
+                break;
+            }
+            $link = $matches[0];
         }
-        foreach ($response["body"] as $todo_json){
-            $todo = Todo::load_from_api_response($todo_json);
-            array_push($instance->todos, $todo);
-        }
+        
+        
+        
 
         return $instance;
     }
 
     function generate_basecamp_json(){
-        return json_encode([
+
+        $data = [
             "name" => $this->name,
-            "description" => readfile($this->description_file)
-        ]);
+        ];
+
+        $myfile = fopen($this->description_file, "r") or die("Unable to open $this->description_file in TodoList->generate_basecamp_json!");
+        $description = fread($myfile,filesize($this->description_file)) or die("Unable to read $this->description_file in TodoList->generate_basecamp_json!");
+        fclose($myfile);
+        $data["description"] = $description;
+
+        return json_encode($data);
     }
 
     function add_todo($todo) {
 
         # make api request to add todo
-        $data = $todo.generate_basecamp_json();
+        $data = $todo->generate_basecamp_json();
         $response = api_curl_post_json($this->todos_url, $data);
         if ($response["headers"]["status"] != "201"){
             die("Error: Unsuccessful curl post request to ".$this->todos_url." in TodoList::add_todo, status: " 
             . $response["headers"]["status"]);
         }
-        $todo.set_api_url($response["body"]->url);
+        $todo->set_api_url($response["body"]->url);
 
         # add todo into TodoList
         array_push($this->todos, $todo);
