@@ -86,9 +86,14 @@ class Todo {
     Returns a json body for bascamp api requests to make a todo
     */
     function generate_basecamp_json(){
+
+        $myfile = fopen($this->description_file, "r") or die("Unable to open $this->description_file in Todo->generate_basecamp_json!");
+        $description = fread($myfile,filesize($this->description_file)) or die("Unable to read $this->description_file in Todo->generate_basecamp_json!");
+        fclose($myfile);
+
         return json_encode([
             "content" => $this->content,
-            "description" => read_file($this->description_file),
+            "description" => $description,
             "assignee_ids" => $this->assignee_ids,
             "completion_subscriber_ids" => $this->completion_subscriber_ids,
             "notify" => $this->notify,
