@@ -1,4 +1,6 @@
-<?php 
+<?php
+
+require_once("library/misc.php");
 
 /*
     parses response string into headers and body
@@ -55,26 +57,51 @@ function api_curl_get ($uri) {
 }
 
 function api_curl_post_json ($uri, $data) {
-    global $ACCESS_TOKEN;
 
-    # post data to uri, and get a response string
-    $ch = curl_init($uri);
-    $headers = array(
-        "Authorization: Bearer ".$ACCESS_TOKEN,
-        "Content-Type: application/json"
-    );
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); # return string, don't print it
-    curl_setopt($ch, CURLOPT_HEADER, true); # include headers in output
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_USERAGENT, "CAA Officer App (sauer319@umn.edu)");
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-    $response_str = curl_exec($ch);
+    if ($GLOBALS["suppress_post_requests"] == false) {
 
-    $response = parse_response_str($response_str);
 
-    curl_close($ch);
-    return $response;
+        global $ACCESS_TOKEN;
+
+        # post data to uri, and get a response string
+        $ch = curl_init($uri);
+        $headers = array(
+            "Authorization: Bearer " . $ACCESS_TOKEN,
+            "Content-Type: application/json"
+        );
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); # return string, don't print it
+        curl_setopt($ch, CURLOPT_HEADER, true); # include headers in output
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_USERAGENT, "CAA Officer App (sauer319@umn.edu)");
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        $response_str = curl_exec($ch);
+
+        $response = parse_response_str($response_str);
+
+        curl_close($ch);
+        return $response;
+    } else {
+        $request = [
+            "method-type" => "Post",
+            "request-url" => $uri,
+            "headers" => [
+                "Authorization" => "Bearer" . $ACCESS_TOKEN,
+                "Content-Type" => "application/json",
+                "User-Agent" => "CAA Officer App (sauer319@umn.edu)"
+
+            ],
+            "body" => $data
+        ];
+        pretty_print($request);
+        $fake_response = [
+            "headers" => [
+                "status" => 200
+            ],
+            "data" => []
+        ];
+        return $fake_response;
+    }
 }
 
 # TODO:
