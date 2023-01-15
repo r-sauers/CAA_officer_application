@@ -1,5 +1,11 @@
 <?php
 
+require_once("library/evtcatdict.php");
+require_once("library/rolesdict.php");
+require_once("library/officerdict.php");
+require_once("library/todolist.php");
+require_once("library/todo.php");
+
 class Event {
 
     public $name, $timestamp, $location, $event_categories_include, 

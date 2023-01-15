@@ -1,5 +1,8 @@
 <?php
 
+require_once("library/curl_funcs.php");
+require_once("library/misc.php");
+
 /*
 This class stores todo information used in the basaecamp api:
     - $api_url:             a link to the api endpoint of the todo

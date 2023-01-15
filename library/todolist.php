@@ -1,5 +1,9 @@
 <?php
 
+require_once("library/curl_funcs.php");
+require_once("library/todo.php");
+require_once("library/misc.php");
+
 class TodoList
 {
     private $name;
