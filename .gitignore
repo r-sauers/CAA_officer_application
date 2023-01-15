@@ -1,3 +1,6 @@
 /oauth_secret.php
 /descriptions/*
 /attachments/*
+/roles.json
+/officers.json
+/event_categories.json
