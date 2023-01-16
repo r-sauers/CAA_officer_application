@@ -18,15 +18,15 @@ class TodoList
         $this->todos = [];
     }
 
-    static function create_list($name, $description_file, $todoset_endpoint){
+    static function create_list($name, $todoset_endpoint, $description_file="descriptions/none.rtf"){
         $instance = new self($name, $description_file);
 
         $data = $instance->generate_basecamp_json();
         $response = api_curl_post_json($todoset_endpoint, $data);
 
         if ($response["headers"]["status"] == "201"){
-            $instance->api_url = $response["body"]->url;
-            $instance->todos_url = $response["body"]->todos_url;
+            $instance->api_url = $response["body"]["url"];
+            $instance->todos_url = $response["body"]["todos_url"];
         } else {
             die("Error: Unsuccessful curl post request to $todoset_endpoint in TodoList::create_list, status: ".$response["headers"]["status"]);
         }
@@ -46,12 +46,12 @@ class TodoList
         }
 
         # create description file from api response
-        $description_file = generate_description_file($response["body"]->name, $response["body"]->description);
+        $description_file = generate_description_file($response["body"]["name"], $response["body"]["description"]);
 
         # create instance of TodoList and return it
-        $instance = new self($response["body"]->name, $description_file);
+        $instance = new self($response["body"]["name"], $description_file);
         $instance->api_url = $api_url;
-        $instance->todos_url = $response["body"]->todos_url;
+        $instance->todos_url = $response["body"]["todos_url"];
 
         # add existing todos with pagination
         $link = $instance->todos_url;
@@ -107,7 +107,7 @@ class TodoList
             die("Error: Unsuccessful curl post request to ".$this->todos_url." in TodoList::add_todo, status: " 
             . $response["headers"]["status"]);
         }
-        $todo->set_api_url($response["body"]->url);
+        $todo->set_api_url($response["body"]["url"]);
 
         # add todo into TodoList
         array_push($this->todos, $todo);

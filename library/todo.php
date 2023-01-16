@@ -58,21 +58,21 @@ class Todo {
         $description_file = generate_description_file($response->content, $response->description);
 
         $assignee_ids = [];
-        foreach ($response->assignees as $assignee) {
+        foreach ($response["assignees"] as $assignee) {
             array_push($assignee_ids, $assignee->id);
         }
         $completion_subscriber_ids = [];
-        foreach ($response->completion_subscribers as $completion_subscriber) {
-            array_push($completion_subscriber_ids, $completion_subscriber->id);
+        foreach ($response["completion_subscribers"] as $completion_subscriber) {
+            array_push($completion_subscriber_ids, $completion_subscriber["id"]);
         }
 
         # create it
         $instance = new self(
-            $response->content, $description_file,
-            $response->due_on, $assignee_ids, $response->starts_on, 
+            $response["content"], $description_file,
+            $response["due_on"], $assignee_ids, $response["starts_on"], 
             null, $completion_subscriber_ids);
 
-        $instance->set_api_url($response->url);
+        $instance->set_api_url($response["url"]);
 
         return $instance;
 

@@ -29,7 +29,7 @@ function parse_response_str($response_str){
     }
 
     # get body if it exists
-    $response["body"] = json_decode(htmlspecialchars_decode(strtok("\n")));
+    $response["body"] = json_decode(htmlspecialchars_decode(strtok("\n")),true);
 
     return $response;
 }
@@ -58,10 +58,9 @@ function api_curl_get ($uri) {
 
 function api_curl_post_json ($uri, $data) {
 
+    global $ACCESS_TOKEN;
+
     if ($GLOBALS["suppress_post_requests"] == false) {
-
-
-        global $ACCESS_TOKEN;
 
         # post data to uri, and get a response string
         $ch = curl_init($uri);
@@ -91,14 +90,14 @@ function api_curl_post_json ($uri, $data) {
                 "User-Agent" => "CAA Officer App (sauer319@umn.edu)"
 
             ],
-            "body" => $data
+            "body" => htmlspecialchars($data)
         ];
         pretty_print($request);
         $fake_response = [
             "headers" => [
-                "status" => 200
+                "status" => 201,
             ],
-            "data" => []
+            "body" => []
         ];
         return $fake_response;
     }

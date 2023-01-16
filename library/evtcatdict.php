@@ -7,7 +7,7 @@ class EvtCatDict {
     function __construct($json_file){
         $myfile = fopen($json_file, "r") or die("Unable to open $json_file in EvtCatDict->__construct!");
         $this->evt_cat_dict = fread($myfile,filesize($json_file)) or die("Unable to read $json_file in EvtCatDict->__construct!");
-        $this->evt_cat_dict = json_decode($this->evt_cat_dict) or die("Error generating json in EvtCatDict->__construct");
+        $this->evt_cat_dict = json_decode($this->evt_cat_dict, true) or die("Error generating json in EvtCatDict->__construct");
         fclose($myfile);
     }
 
@@ -28,7 +28,7 @@ class EvtCatDict {
         # copy $event_categories into $unexpanded and $expanded
         # so we don't have to modify the old array
         foreach ($event_categories as $event_category){
-            if (count($this->evt_cat_dict[$event_category]["event_categories"]) === 0){
+            if (count($this->evt_cat_dict[$event_category]["child_categories"]) === 0){
                 array_push($expanded, $event_category);
             } else {
                 array_push($unexpanded, $event_category);
@@ -52,7 +52,7 @@ class EvtCatDict {
             }
 
             # expand subcategories of event_category back into $unexpanded
-            foreach ($this->evt_cat_dict[$event_category]["event_categories"] as $sub_event_category) {
+            foreach ($this->evt_cat_dict[$event_category]["child_categories"] as $sub_event_category) {
                 array_push($unexpanded, $sub_event_category);
             }
         }
