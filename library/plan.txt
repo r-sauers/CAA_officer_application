@@ -1,69 +1,23 @@
 For this app, I need:
 
+
+My Next task is:
+- store/import necessary information about events/todolists/todos in mySQL
+
 AnnualTodo
 
 annual_category
 
-Event(name, date/time, location, event_categories_include, event_categories_exclude): 
-- will create a TodoList using event_categories
-    - will add Todos to Todolist
-- stores Todos in itself with an additional properties:
-    - lowest_event_category: in the event_categories, this is the event_category that directly contains
-      the todo
-- stores information about the event
+I have come across situations where it may be good to create a todo outside of the event todolist.
+Cases that I can think of: monthly/weekly email, SSF funding, vegfund funding, room reservations. Perhaps even bringing signup forms to meetings.
+These are all things that have a due date independent of the event.
+The difficulty in making this work is really finding the specific todolist to put it in. We'll need a new attribute for todos called "todolist".
+For that attribute, we can give a variable name to a list. This name will have to be stored somewhere. Most likely it will be mannaged as an annual todolist.
 
-TodoList
-- contains basecamp link
-- contains array of todos in the list
-- contains the basecamp arguments that were used to make it (NOTE: there is a link to the description)
-- has a method that makes the basecamp creation json
-- has a method to set basecamp link
-- has a method to create itself in basecamp
-- has a method to add a todo
+I'm really intrigued by the question of how we do emails. Obviously, if we are sending out emails for eventbrite, signup, advance notification, notification, and reminder
+all separately, we will have a ton of emails! Previously we have combined a lot of these into one email. So I'm thinking a weekly email. But a weekly email is almost not worth it
+since most weeks we only have 1 event. So perhaps a biweekly email would be better? With email reminders for every event?
 
-Todo
-- contains basecamp link
-- contains the basecamp arguments used to make it (NOTE: there is a link to the description)
-- has a method that makes the basecamp creation json
-- has a method to set basecamp link
-- This is created in basecamp by adding it to a TodoList
-
-PROBLEM!!! this is a tree, we can't randomly access a leaf on the tree based on its name!
-- We will have to turn this into an actual tree data structure, not a dictionary tree
-- Then we can make a dictionary that links the name to a node on the tree
-- In this way we can access any node in the tree by name, and we can honor the tree structure
-  that can have children that are both todo and event_category
-- note that I still want to make this tree from a json dictionary since a json dictionary can be
-  understood and edited
-- I also will want the dictionary/tree to specify whether a node is an event_category or a todo
-event_categories
-- this is a dictionary that stores information about given event categories
-- each event category contains a list of todos and/or event categories
-- todos describes:
-    - due date offset from event date
-    - todo description (or rather a link to the description)
-    - POSSIBLY a list of variables to put into the description??
-
-roles
-- this is a dictionary of roles (e.g. Treasurer)
-- each role is assigned:
-    - a list of event categories they are responsible for
-        - it may contain an event category higher up the tree. The event category will be split 
-          into its subcomponents at the start of the program
-    - a list of OTHER??? categories they are responsible for
-
-officers
-- this is a dictionary of officers (e.g. Ryan Sauers)
-- each officer is assigned:
-    - a role
-    - basecamp IDs used to assign person a todo
-
-You can find the officers needed for a todo by:
-- getting category 
-- looping through roles dictionary, search each role for each event category
-    in the list (starting with the first)
-    - save role on first match and break out
-- search through officers to find which officer has that role
 
 What happens with officer changes or role changes?
 - change officers

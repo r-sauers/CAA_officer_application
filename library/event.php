@@ -30,17 +30,26 @@ class Event {
             }
         }
 
-        # create todolist and add todos
+        # create todolist and add todos from the given event categories
         $this->todolist = TodoList::create_list($name.date(" m/d/Y", $timestamp), $todoset_endpoint);
         foreach ($expanded_categories as $event_category){
+            
             $dict_entry = $evt_cat_dict->get_entry($event_category);
             $assignee_ids = $this->get_assignee_ids($event_category, $roles_dict, $officers_dict);
+            
             foreach ($dict_entry["todos"] as $todo_template) {
-                $due_end = $this->timestamp - $todo_template["due_offset"]*24*60*60;
-                $due_start = $due_end - $todo_template["due_duration"]*24*60*60;
-                # TODO: make it so dates are neither before current day nor past event date
+
+                $seconds_offset = $todo_template["due_offset"]*24*60*60; // convert days to seconds
+                $seconds_duration = $todo_template["due_duration"]*24*60*60;
+                $due_start = max($this->timestamp - $seconds_offset - $seconds_duration, time()); // ensure start date is later than the time of making
+                $due_end = min($due_start + $seconds_duration, $this->timestamp); // ensure end date is before event date
+
                 $todo = new Todo($todo_template["title"], $todo_template["description_file"], date("Y-m-d", $due_end), $assignee_ids, date("Y-m-d", $due_start), true, []);
-                array_push($this->todos, $todo);
+                
+                array_push($this->todos, [
+                    "event_category" => $event_category, // keep track of event_category so we can update todo when event_category is edited
+                    "todo" => $todo
+                ]);
                 $this->todolist->add_todo($todo);
             }
         }
