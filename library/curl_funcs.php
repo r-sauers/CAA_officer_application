@@ -40,7 +40,7 @@ function api_curl_get ($uri) {
     # get curl response string from given uri
     $ch = curl_init($uri);
     $headers = array(
-        "Authorization: Bearer ".apache_getenv('ACCESS_TOKEN')
+        "Authorization: Bearer " . $_SESSION['ACCESS_TOKEN']
     );
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); # return string, don't print it
     curl_setopt($ch, CURLOPT_HEADER, true); # include headers in output
@@ -61,7 +61,7 @@ function api_curl_post_json ($uri, $data) {
         # post data to uri, and get a response string
         $ch = curl_init($uri);
         $headers = array(
-            "Authorization: Bearer " . apache_getenv('ACCESS_TOKEN'),
+            "Authorization: Bearer " . $_SESSION['ACCESS_TOKEN'],
             "Content-Type: application/json"
         );
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); # return string, don't print it
@@ -81,7 +81,7 @@ function api_curl_post_json ($uri, $data) {
             "method-type" => "Post",
             "request-url" => $uri,
             "headers" => [
-                "Authorization" => "Bearer" . $ACCESS_TOKEN,
+                "Authorization" => "Bearer" . $_SESSION['ACCESS_TOKEN'],
                 "Content-Type" => "application/json",
                 "User-Agent" => "CAA Officer App (sauer319@umn.edu)"
 
@@ -103,7 +103,7 @@ function api_curl_post_json ($uri, $data) {
 function api_curl_post_attachment ($uri) {
     $ch = curl_init($uri);
     $headers = array(
-        "Authorization: Bearer " . apache_getenv('ACCESS_TOKEN')
+        "Authorization: Bearer " . $_SESSION['ACCESS_TOKEN']
     );
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
