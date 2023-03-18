@@ -16,7 +16,7 @@ Ways to Contribute:
 - creating and solving issues
 - and more (I have ideas I can give)
 
-Please see the [setup guide](https://github.com/r-sauers/CAA_officer_application/edit/main/README.md#setup) for help setting the application up on your device.
+Please see the [setup guide](https://github.com/r-sauers/CAA_officer_application#setup) for help setting the application up on your device.
 
 You can create a pull request to help contribute.
 
@@ -139,7 +139,7 @@ Where `access.conf` controls the client's access to files, and `envvars.conf` se
 
 ### Running the Server
 To run the server, you must do three things:
-- move files into `/var/www/html` as described in [Downloading and Managing Application Files](https://github.com/r-sauers/CAA_officer_application/edit/main/README.md#downloading-and-managing-application-files)
+- move files into `/var/www/html` as described in [Downloading and Managing Application Files](https://github.com/r-sauers/CAA_officer_application#downloading-and-managing-application-files)
 - run `initialization.py`
 - run `service apache2 start`
 
