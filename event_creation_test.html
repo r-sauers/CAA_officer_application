@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Event UI Creation Test</title>
+        <style>
+            body {
+                height: 99vh;
+                margin: 0px;
+            }
+
+            ul {
+                list-style-type:none;
+            }
+            #main-panel {
+                /* total width of #side-panel */
+                margin-left: 312px;
+                padding: 10px;
+            }
+
+            #side-panel {
+
+                position: fixed;
+                top: 0px;
+
+                border-right: 2px solid lightgray;
+                background-color: rgb(250, 250, 250);
+                padding: 5px;
+
+                height: 100%;
+                width: 300px;
+            }
+            .event-category {
+                
+                background-color: rgb(250, 250, 250);
+                width: 100%;
+                height: 30px;
+                padding-top: 10px;
+                padding-right: 5px;
+            }
+            .event-category + .event-category {
+                border-top: 2px solid lightgray;
+            }
+            .event-category:hover {
+                background-color: rgb(240, 240, 240);
+            }
+            .event-category > span {
+                margin-left: 5px;
+                margin-right: 15px;
+                font-family: sans-serif;
+                min-width: 150px;
+            }
+            .event-category > ul {
+                position:relative;
+                top: -30px;
+                left: 170px;
+                width: max-content;
+                background-color: rgb(250, 250, 250);
+                border: 2px solid lightgray;
+                border-radius: 10px;
+                padding: 5px;
+                z-index: 2;
+            }
+            .event-category.hidden > ul {
+                display: none;
+            }
+            .event-category.hidden::after {
+                content: "🢒";
+                display: inline-block;
+                font-size: 20pt;
+                position: absolute;
+                z-index: 1;
+                margin-top: -10px;
+                margin-left: -6px;
+            }
+            .switch {
+                display: inline-block;
+                position: relative;
+                width: 40px;
+                height: 17px;
+            }
+            .switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+                margin: 0px;
+            }
+
+            .toggle {
+                position: absolute;
+                left: 0px;
+                right: 0px;
+                top: 0px;
+                bottom: 0px;
+                border-radius: 10px;
+                background-color: rgb(226, 244, 250);
+                border: 1px solid lightgray;
+                padding-top: 2px;
+                user-select: none;
+                transition: 0.3s;
+                cursor: pointer;
+            }
+            .toggle:before {
+                position: absolute;
+                content: "";
+                top: 0px;
+                left: 0px;
+                width: 15px;
+                height: 15px;
+                background-color: rgb(88, 119, 255);
+                border-radius: 10px;
+                transition: 0.3s;
+
+            }
+
+            input:checked + .toggle {
+                background-color: rgb(154, 198, 255)
+            }
+            input:checked + .toggle:before {
+                background-color: rgb(50, 88, 255);
+                transform: translateX(22px);
+            }
+        </style>
+    </head>
+    <body>
+        <form id="event-creation">
+            <div id="side-panel">
+                <ul>
+                </ul>
+            </div>
+            <div id="main-panel">
+                <h2>Create Event</h2>
+                <label>Name: </label><input name="event-name" type="text"><br>
+                <label>Location: </label><input name="event-location" type="text"><br>
+                <label>Date: </label><input name="event-date" type="date"><br><br>
+                <input id="submit" type="submit" value="Create Event">
+            </div>
+        </form>
+    </body>
+    <script>
+        
+  
+        /** Creates a basic slider
+         * @param {string} name (optional) the unique name of the checkbox
+         * @return {Element} the checkbox element of the slider
+         * */
+        function createSlider(name=""){
+
+            // label holds everything together
+            label = document.createElement("label");
+            label.setAttribute("class", "switch");
+
+            // checkbox is an invisible checkbox that provides the functionality of the slider
+            checkbox = document.createElement("input");
+            checkbox.setAttribute("type", "checkbox");
+            if (name) {
+                checkbox.setAttribute("name", name);
+            }
+            
+
+            // toggle displays the status of the slider
+            toggle = document.createElement("span");
+            toggle.setAttribute("class", "toggle");
+
+            label.appendChild(checkbox);
+            label.appendChild(toggle);
+
+            return checkbox;
+        }
+        
+        class EventCategoryManager {
+
+            /** 
+             * @param {string} json a json file giving the layout of event categories
+             * @param {Element} mainPanel a container for the display of event categories
+             */
+            constructor(json, mainPanel) {
+                
+                this.mainPanel = mainPanel;
+                this.eventCategories = {}; // event categories can be quickly accessed here
+                this.eventCategoriesList = []; // event categories are ordered here
+
+                var input = JSON.parse(json);
+                for (var key in input) {
+                    name = this.createName(key);
+                    var evtCat = this.addEventCategory(name, key);
+                    input[key]["child_categories"].forEach((val, ind, ary) => {
+                        evtCat.addSubcategory(this.createName(val));
+                    });
+                }
+            }
+
+            /** Creates a name from the json input key (used in constructor)
+             * @param {string} key the key used to describe an event category in json
+             * @return {string} the name the event category will be displayed with
+             */
+            createName(key){
+                key = key.replace("_", " ");
+                key = key.replace(/(^\w|\s\w)/g, m => m.toUpperCase());
+                return key;
+            }
+
+            /** Creates and adds an event category to the end of the displayed list
+             * @param {string} name the name of the event category
+             * @return {EventCategory} the event category that was created
+             * */
+            addEventCategory(name, raw_name){
+                this.eventCategories[name] = new EventCategory(name, this.eventCategories, raw_name);
+                this.eventCategoriesList.push(name);
+                return this.eventCategories[name];
+            }
+
+            /** Displays all of the event categories  */
+            display(){
+                var ul = document.getElementById("side-panel").firstElementChild;
+                this.eventCategoriesList.forEach((val, ind, ary) => {
+                    ul.appendChild(this.eventCategories[val].createElements(true));
+                });
+            }
+
+        }
+
+        class EventCategory {
+
+            /**
+             * @param {string} name the name of the event category
+             * @param {dictionary} eventCategories a reference to a dictionary containing all of the 
+             * event categories
+             * @param {string} raw_name the key value that came with this
+             */
+            constructor(name, eventCategories, raw_name){
+                this.name = name;
+                this.raw_name = raw_name
+                this.subcategories = [];
+                this.eventCategories = eventCategories;
+                this.included = false;
+                this.excluded = false;
+                this.toggles = [];
+            }
+            addSubcategory(subcategory) {
+                this.subcategories.push(subcategory);
+            }
+            isToggled(){
+                return this.included;
+            }
+            toggleOn() {
+                this.included = true;
+                this.excluded = false;
+                this.toggles.forEach((val, ind, ary) => {
+                    val.checked = true;
+                });
+                this.subcategories.forEach((val, ind, ary) => {
+                    this.eventCategories[val].toggleOn();
+                });
+            }
+            toggleOff() {
+                this.included = false;
+                this.excluded = false;
+                this.toggles.forEach((val, ind, ary) => {
+                    val.checked = false;
+                });
+                this.subcategories.forEach((val, ind, ary) => {
+                    this.eventCategories[val].toggleOff();
+                });
+            }
+            parentToggleOn(){
+                this.toggleOn();
+            }
+            parentToggleOff(){
+                this.toggleOff();
+            }
+            toggle(){
+                if(this.included === false){
+                    this.toggleOn();
+                } else {
+                    this.toggleOff();
+                }
+                
+            }
+
+            /** Creates the ui elements for the event category and returns the created elements
+             * @param {boolean} toplevel toplevel is true if these elements will not be nested 
+             * within other event category containers
+             * @return {Element} the container of created elements
+             */
+            createElements (toplevel){
+                
+                // li holds everything together and handles expansion of subcategories
+                var li = document.createElement("li");
+                li.setAttribute("class", "event-category")
+
+                // slider allows the event category to be toggled
+                var slider = null;
+                if (toplevel) slider = createSlider(this.raw_name);
+                else slider = createSlider();
+                this.toggles.push(slider);
+                slider.addEventListener("click", ()=>{this.toggle()});
+                
+                // name lets the user know what the name of this event category is
+                var name = document.createElement("span");
+                name.appendChild(document.createTextNode(this.name));
+
+                li.appendChild(slider.parentNode);
+                li.appendChild(name);
+
+                // handles the display of subcategories
+                if (this.subcategories.length > 0) {
+                    var ul = document.createElement("ul");
+                    li.classList.toggle("hidden");
+                    li.appendChild(ul);
+                    li.onmouseenter = function(evt){
+                        evt.srcElement.classList.toggle("hidden");
+                    }
+                    li.onmouseleave = function(evt){
+                        evt.srcElement.classList.toggle("hidden");
+                    }
+                    
+                    this.subcategories.forEach((val, ind, array) => {
+                        if (!(val in this.eventCategories)) {
+                            console.error(`${val} is not in eventCategories!`);
+                            return;
+                        }
+                        ul.appendChild(this.eventCategories[val].createElements(false));
+                    });
+                }
+
+                return li;
+            }
+            
+
+        }
+
+        var json = {
+    "video_outreach": {
+        "json_description": "",
+        "todos": [ ],
+        "child_categories" : [
+            "volunteer_communications"
+        ]
+    },
+    
+    "event_communications": {
+        "json_description": "",
+        "todos": [ ],
+        "child_categories" : [
+            "schedule_calendar",
+            "send_discord",
+            "send_email"
+        ]
+    },
+    
+    "volunteer_communications": {
+        "json_description": "",
+        "todos": [],
+        "child_categories" : [
+            "schedule_calendar",
+            "send_discord",
+            "send_email"
+        ]
+    },
+    
+    "meeting_communications": {
+        "json_description": "",
+        "todos": [],
+        "child_categories": [
+            "schedule_calendar",
+            "send_discord",
+            "send_email"
+        ]
+    },
+
+    "review_basecamp": {
+        "json_description": "Review basecamp tasks to make sure we have everything we need. (due right after making list)",
+        "todos": [
+            {
+                "title": "Review Basecamp Tasks",
+                "due_offset": 365,
+                "due_duration": 7,
+                "description_file": null
+            }
+        ],
+        "child_categories" : []
+    },
+
+    "schedule_calendar": {
+        "json_description": "schedule event on google calendar",
+        "todos": [
+            {
+                "title": "Schedule on Google Calendar",
+                "due_offset": 30,
+                "due_duration": 7,
+                "description_file": "descriptions/schedule_calendar.rtf"
+            }
+        ],
+        "child_categories": [ ]
+    },
+
+    "send_discord": {
+        "json_description": "",
+        "todos": [
+            {
+                "title": "Discord Announcement (Day Before)",
+                "due_offset": 1,
+                "due_duration": 0,
+                "description_file": "descriptions/send_discord_notice.rtf"
+            },
+            {
+                "title": "Discord Reminder (Day-of)",
+                "due_offset": 0,
+                "due_duration": 0,
+                "description_file": "descriptions/send_discord_reminder.rtf"
+            }
+        ],
+        "child_categories": []
+    },
+
+    "send_email": {
+        "json_description": "",
+        "todos": [
+            {
+                "title": "Schedule Email Announcement and Reminder",
+                "due_offset": 7,
+                "due_duration": 7,
+                "description_file": "descriptions/send_email_notice.rtf"
+            }
+        ],
+        "child_categories" : []
+    },
+
+    "exploreveg_event": {
+        "json_description": "",
+        "todos": [
+            {
+                "title": "Create Exploreveg Event",
+                "due_offset": 30,
+                "due_duration": 7,
+                "description_file": null
+            }
+        ],
+        "child_categories": []
+    },
+
+    "signup": {
+        "json_description": "",
+        "todos": [],
+        "child_categories": [
+            "create_signup",
+            "email_signup",
+            "discord_signup",
+            "review_signup"
+        ]
+    },
+
+    "create_signup": {
+        "json_description": "",
+        "todos": [
+            {
+                "title": "Create signup",
+                "due_offset": 21,
+                "due_duration": 7,
+                "description_file": null
+            }
+        ],
+        "child_categories": []
+    },
+
+    "email_signup": {
+        "json_description": "",
+        "todos": [
+            {
+                "title": "Send an email signup",
+                "due_offset": 21,
+                "due_duration": 7,
+                "description_file": null
+            }
+        ],
+        "child_categories": []
+    },
+
+
+    "template": {
+        "json_description": "",
+        "todos": [
+
+        ],
+        "child_categories" : [
+
+         ]
+    }
+};
+
+        var json_string = JSON.stringify(json);
+        var eventCategoryManager = new EventCategoryManager(json_string);
+        eventCategoryManager.display();
+        
+        function getData(form) {
+            var formData = new FormData(form);
+
+            // iterate through entries...
+            for (var pair of formData.entries()) {
+                console.log(pair[0] + ": " + pair[1]);
+            }
+
+            // ...or output as an object
+            console.log(Object.fromEntries(formData));
+        }
+
+        document.getElementById("event-creation").addEventListener("submit", function (e) {
+            e.preventDefault();
+            getData(e.target);
+        });
+
+    </script>
+</html>
