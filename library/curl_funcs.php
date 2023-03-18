@@ -37,12 +37,10 @@ function parse_response_str($response_str){
 # This function makes a curl request for reading api data
 function api_curl_get ($uri) {
 
-    global $ACCESS_TOKEN;
-
     # get curl response string from given uri
     $ch = curl_init($uri);
     $headers = array(
-        "Authorization: Bearer ".$ACCESS_TOKEN
+        "Authorization: Bearer ".apache_getenv('ACCESS_TOKEN')
     );
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); # return string, don't print it
     curl_setopt($ch, CURLOPT_HEADER, true); # include headers in output
@@ -58,14 +56,12 @@ function api_curl_get ($uri) {
 
 function api_curl_post_json ($uri, $data) {
 
-    global $ACCESS_TOKEN;
-
     if ($GLOBALS["suppress_post_requests"] == false) {
 
         # post data to uri, and get a response string
         $ch = curl_init($uri);
         $headers = array(
-            "Authorization: Bearer " . $ACCESS_TOKEN,
+            "Authorization: Bearer " . apache_getenv('ACCESS_TOKEN'),
             "Content-Type: application/json"
         );
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); # return string, don't print it
@@ -105,10 +101,9 @@ function api_curl_post_json ($uri, $data) {
 
 # TODO:
 function api_curl_post_attachment ($uri) {
-    global $ACCESS_TOKEN;
     $ch = curl_init($uri);
     $headers = array(
-        "Authorization: Bearer ".$ACCESS_TOKEN
+        "Authorization: Bearer " . apache_getenv('ACCESS_TOKEN')
     );
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);

@@ -4,14 +4,10 @@
  * https://www.phpclasses.org/package/7700-PHP-Authorize-and-access-APIs-using-OAuth.html
  * 
  */
-
+	
 	// grabs libraries
 	require('./http/http.php');
 	require('./oauth/oauth_client.php');
-
-	// grabs variables
-	require("./oauth_id.php");
-	require("./oauth_secret.php");
 	
 	// configure oauth
 	$client = new oauth_client_class;
@@ -21,9 +17,10 @@
 	$client->redirect_uri = 'http://'.$_SERVER['HTTP_HOST'].
 		dirname(strtok($_SERVER['REQUEST_URI'],'?')).'caaofficerapp.php';
 
-	$client->client_id = $CAA_APP_OAUTH_ID;
+	$client->client_id = getenv("CAA_APP_BASECAMP_OAUTH_ID");
+	error_log("\n\n" . $client->client_id . "\n\n");
 	$application_line = __LINE__;
-	$client->client_secret = $CAA_APP_OAUTH_SECRET;
+	$client->client_secret = getenv("CAA_APP_BASECAMP_OAUTH_SECRET");
 	$client->scope = ''; // no api permissions needed
 
 	// request token
@@ -79,7 +76,7 @@
 	$evt_cat_dict = new EvtCatDict("event_categories.json");
 
 	// get Access
-	$ACCESS_TOKEN = $client->access_token;
+	apache_setenv('ACCESS_TOKEN', $client->access_token);
 
 	# Welcome User
 	echo '<h1>', HtmlSpecialChars($user->identity->first_name),
