@@ -1,4 +1,4 @@
-# CAA_officer_application
+# CAA Officer Application
 ## About
 This is a web application that is supposed to make CAA (Compassionate Action for Animals) UMN (University of Minnesota) student chapter officer tasks easier, more efficient, and more thorough. The aim of this application is to be able to automatically create tasks in Basecamp for officers. This will help the student group in a number of areas:
 - officer transitions: The task descriptions will be tutorial-like and as such will be a great resource for new officers, thus easing officer transitions.
