@@ -11,6 +11,13 @@ class EvtCatDict {
         fclose($myfile);
     }
 
+    /** @param event_category a string naming an event category
+     *  @return true if event_category exists, false otherwise
+     */
+    function has_category($event_category){
+        return isset($this->evt_cat_dict[$event_category]);
+    }
+
     function get_entry($event_category){
         return $this->evt_cat_dict[$event_category];
     }

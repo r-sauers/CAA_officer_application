@@ -11,6 +11,61 @@ class Event {
     public $name, $timestamp, $location, $event_categories_include, 
     $event_categories_exclude, $todolist, $todos;
 
+    /** @param formdata the json data retrieved from the create event form. This should be an
+     * associative array in the form:
+     * array(
+     *  "event-name" => "name",
+     *  "event-location" => "location",
+     *  "event-date" => "YYYY-MM-DD",
+     *  "video_outreach" => "on" (event category)
+     *  ... (more event categories)
+     * )
+     *  @return event returns associative array:
+     * array(
+     *  "success" => true
+     *  "event" => Event
+     * )
+     * or
+     * array(
+     *  "success" => false
+     *  "error" => string
+     * )
+     */
+    static function from_form_data($formdata, $todoset_endpoint, $evt_cat_dict, $roles_dict, $officers_dict){
+        
+        # check if necessary form data is set
+        if (!isset($formdata["event-name"])) {
+            return array("success" => false, "error" => "event-name" . ' not set');
+        }
+        if (!isset($formdata["event-location"])) {
+            return array("success" => false, "error" => "event-location" . ' not set');
+        }
+        if (!isset($formdata["event-date"])) {
+            return array("success" => false, "error" => "event-date" . ' not set');
+        }
+
+        # create timestamp from date
+        if (!sscanf($formdata["event-date"], "%d-%d-%d", $year, $month, $date)){
+            return array("success" => false, "error" => "incorrect date format, should be YYYY-MM-DD");
+        } else {
+            $timestamp = mktime(0, 0, 0, $month, $date, $year);
+        }
+
+        # grab event categories
+        $evt_cat_inc = [];
+        foreach ($formdata as $evtcat => $v){
+            if ($v == "on" && $evt_cat_dict->has_category($evtcat)) {
+                array_push($evt_cat_inc, $evtcat);
+            }
+        }
+        
+        return array(
+            "success" => true, 
+            "event" => new Event($formdata["event-name"], $timestamp, $formdata["event-location"], $todoset_endpoint, $evt_cat_inc, [], $evt_cat_dict, $roles_dict, $officers_dict)
+        );
+
+    }
+
     function __construct($name, $timestamp, $location, $todoset_endpoint, $event_categories_include, $event_categories_exclude, $evt_cat_dict, $roles_dict, $officers_dict){
 
         $this->name = $name;
@@ -69,5 +124,4 @@ class Event {
         return $assignee_ids;
     }
 }
-
 ?>

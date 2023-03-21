@@ -14,8 +14,7 @@ verify_login();
     <h3>(under development)</h3>
     <p>Directory: </p>
     <ul>
-        <li><a href="http://<?php echo $_SERVER['HTTP_HOST'] ?>/event_creation_test.html">Create Event (UI)</a></li>
-        <li><a href="http://<?php echo $_SERVER['HTTP_HOST'] ?>/caaofficerapp.php">Create Event (testing)</a></li>
+        <li><a href="http://<?php echo $_SERVER['HTTP_HOST'] ?>/createevent.php">Create Event</a></li>
     </ul>
 </body>
 

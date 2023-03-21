@@ -1,0 +1,116 @@
+body {
+    height: 99vh;
+    margin: 0px;
+}
+
+ul {
+    list-style-type:none;
+}
+#main-panel {
+    /* total width of #side-panel */
+    margin-left: 312px;
+    padding: 10px;
+}
+
+#side-panel {
+
+    position: fixed;
+    top: 0px;
+
+    border-right: 2px solid lightgray;
+    background-color: rgb(250, 250, 250);
+    padding: 5px;
+
+    height: 100%;
+    width: 300px;
+}
+.event-category {
+    
+    background-color: rgb(250, 250, 250);
+    width: 100%;
+    height: 30px;
+    padding-top: 10px;
+    padding-right: 5px;
+}
+.event-category + .event-category {
+    border-top: 2px solid lightgray;
+}
+.event-category:hover {
+    background-color: rgb(240, 240, 240);
+}
+.event-category > span {
+    margin-left: 5px;
+    margin-right: 15px;
+    font-family: sans-serif;
+    min-width: 150px;
+}
+.event-category > ul {
+    position:relative;
+    top: -30px;
+    left: 170px;
+    width: max-content;
+    background-color: rgb(250, 250, 250);
+    border: 2px solid lightgray;
+    border-radius: 10px;
+    padding: 5px;
+    z-index: 2;
+}
+.event-category.hidden > ul {
+    display: none;
+}
+.event-category.hidden::after {
+    content: "🢒";
+    display: inline-block;
+    font-size: 20pt;
+    position: absolute;
+    z-index: 1;
+    margin-top: -10px;
+    margin-left: -6px;
+}
+.switch {
+    display: inline-block;
+    position: relative;
+    width: 40px;
+    height: 17px;
+}
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    margin: 0px;
+}
+
+.toggle {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+    border-radius: 10px;
+    background-color: rgb(226, 244, 250);
+    border: 1px solid lightgray;
+    padding-top: 2px;
+    user-select: none;
+    transition: 0.3s;
+    cursor: pointer;
+}
+.toggle:before {
+    position: absolute;
+    content: "";
+    top: 0px;
+    left: 0px;
+    width: 15px;
+    height: 15px;
+    background-color: rgb(88, 119, 255);
+    border-radius: 10px;
+    transition: 0.3s;
+
+}
+
+input:checked + .toggle {
+    background-color: rgb(154, 198, 255)
+}
+input:checked + .toggle:before {
+    background-color: rgb(50, 88, 255);
+    transform: translateX(22px);
+}
